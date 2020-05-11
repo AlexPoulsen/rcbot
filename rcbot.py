@@ -8,7 +8,7 @@ import Levenshtein as lev
 # client = discord.Client()
 bot = commands.Bot(command_prefix='?')
 
-class Globals:
+class Globals:  # global variables never work
     pass
 
 global_ = Globals()
@@ -55,14 +55,17 @@ async def fork(ctx, branch_id: int = -1, name: str = ""):
 @branch.command(name="display")
 async def display(ctx, branch_id: int = -1):
     if 0 <= branch_id <= 1:
-        await ctx.send(f"Branch {branch_id} `{global_.platform[branch_id].name}` (protected) - {len(global_.platform[branch_id].sections)} sections.")
+        await ctx.send(f"Branch {branch_id} `{global_.platform[branch_id].name}` (protected) - \
+            {len(global_.platform[branch_id].sections)} sections.")
     elif branch_id == -1:
         first_line = f"Listing {len(global_.platform)} branches"
         line_limit_exceeded = ", limited to first 30" if len(global_.platform) > 30 else ''
         line = "-" * int((len(first_line) + len(line_limit_exceeded)) * 1.4)
-        await ctx.send(first_line + line_limit_exceeded + f":\n{line}\n" + "\n".join([f"Branch {i} `{x.name}` - {len(x.sections)} sections" for i, x in zip(range(30), global_.platform)]) + ".")
+        await ctx.send(first_line + line_limit_exceeded + f":\n{line}\n" + "\n".join([f"Branch {i} `{x.name}` - \
+            {len(x.sections)} sections" for i, x in zip(range(30), global_.platform)]) + ".")
     else:
-        await ctx.send(f"Branch {branch_id} `{global_.platform[branch_id].name}` - {len(global_.platform[branch_id].sections)} sections.")
+        await ctx.send(f"Branch {branch_id} `{global_.platform[branch_id].name}` - \
+            {len(global_.platform[branch_id].sections)} sections.")
 
 @branch.command(name="count")
 async def count(ctx):
@@ -117,9 +120,11 @@ async def display(ctx, section_id: int = -1):
         first_line = f"Listing {len(global_.platform[global_.branch])} policies"
         line_limit_exceeded = ", limited to first 30" if len(global_.platform[global_.branch]) > 30 else ''
         line = "-" * int((len(first_line) + len(line_limit_exceeded)) * 1.4)
-        await ctx.send(first_line + line_limit_exceeded + f":\n{line}\n" + "\n".join([f"Section {i} `{x.name}` - {len(x.policies_by_id)} policies" for i, x in zip(range(30), global_.platform[global_.branch])]) + ".")
+        await ctx.send(first_line + line_limit_exceeded + f":\n{line}\n" + "\n".join([f"Section {i} `{x.name}` - \
+            {len(x.policies_by_id)} policies" for i, x in zip(range(30), global_.platform[global_.branch])]) + ".")
     else:
-        await ctx.send(f"Section {section_id} `{global_.platform[global_.branch][section_id].name}` - {len(global_.platform[global_.branch][section_id].policies_by_id)} policies.")
+        await ctx.send(f"Section {section_id} `{global_.platform[global_.branch][section_id].name}` - \
+            {len(global_.platform[global_.branch][section_id].policies_by_id)} policies.")
 
 @section.command(name="select")
 async def select(ctx, section_id: int = -1):
