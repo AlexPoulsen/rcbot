@@ -10,6 +10,7 @@ import itertools
 import datetime
 import os
 import shutil
+import pdf2image
 
 
 class Alphanumeric:
@@ -159,7 +160,8 @@ def diff_latex(text_1: str, text_2: str):
         f.write("".join(out).replace("\u10F6", ""))
     os.chdir(filename)
     os.system(f"pdflatex {filename}{current_datetime}.tex")
-    shutil.copy2(f"{filename}{current_datetime}.pdf", os.path.dirname(os.path.realpath("/Users/macbookpro/rcbot/text_images/")))
+    shutil.copy2(f"{filename}{current_datetime}.pdf", os.path.realpath("/Users/macbookpro/rcbot/text_images/"))
+    images = pdf2image.convert_from_path(f"/Users/macbookpro/rcbot/text_images/{current_datetime}.pdf", output_folder="/Users/macbookpro/rcbot/text_images/", fmt='png', output_file=current_datetime, single_file=True)
     shutil.rmtree("/Users/macbookpro/rcbot/tex_files/")
     os.mkdir("/Users/macbookpro/rcbot/tex_files/")
     return filename
