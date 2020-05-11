@@ -1,3 +1,5 @@
 *.keys
 __pycache__
 text_images
+tex_files
+tex_testing
