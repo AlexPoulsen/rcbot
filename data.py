@@ -3,10 +3,13 @@ import copy
 import textwrap
 import Levenshtein as lev
 import itertools
-from wand.color import Color
-from wand.image import Image
-from wand.drawing import Drawing
-from wand.compat import nested
+# from wand.color import Color
+# from wand.image import Image
+# from wand.drawing import Drawing
+# from wand.compat import nested
+import datetime
+import os
+import shutil
 
 
 class Alphanumeric:
@@ -26,52 +29,52 @@ class RevisionUnchangeableError(Exception):
         return "Revision Object is not editable to preserve revision state, cache edits instead."
 
 
-def diff_image(text_1: str, text_2: str):
-    with Drawing() as draw:
-        with Image(width=1000, height=1000, background=Color('hsla(0, 0, 100, 50)')) as img:
-            draw.font_family = 'Helvetica'
-            draw.font_size = 30.0
-            draw.push()
-            draw.fill_color = Color("hsl(0%, 0%, 0%)")
-            draw.gravity = "north_west"
-            draw.text_under_color = Color("hsl(0%, 100%, 50%)")
-            draw.text(10,10, "\n".join(textwrap.wrap("Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters.", 75)))
-            text_1 = "\u10F6" + text_1  # otherwise edits without matching preceding text are not shown
-            text_2 = "\u10F6" + text_2
-            out = []
-            matched_blocks = lev.matching_blocks(lev.editops(text_1, text_2), text_1, text_2)
-            for i, matching in enumerate(zip(matched_blocks, matched_blocks[1:] + [0])):
-                if matching[0][2] == 0:
-                    continue
-                if matching[0][0] > 0 and i == 0:
-                    out.append("[--[")
-                    for n in range(matching[0][0]):
-                        out.append(text_1[n])
-                    out.append("], ++[")
-                    for n in range(matching[0][0]):
-                        out.append(text_2[n])
-                    out.append("]]")
-                for n in range(matching[0][2]):
-                    out.append(text_1[n+matching[0][0]])
-                has_remove = (matching[0][0] + matching[0][2]) - matching[1][0] < 0
-                has_add    = (matching[0][1] + matching[0][2]) - matching[1][1] < 0
-                if has_add or has_remove:
-                    out.append("[")
-                    if has_remove:
-                        out.append("--[")
-                        for n in range(matching[0][0] + matching[0][2], matching[1][0]):
-                            out.append(text_1[n])
-                        out.append("], ")
-                    if has_add:
-                        out.append("++[")
-                        for n in range(matching[0][1] + matching[0][2], matching[1][1]):
-                            out.append(text_2[n])
-                        out.append("]")
-                    out.append("]")
-            draw.pop()
-            draw(img)
-            img.save(filename='image.png')
-            return "".join(out).replace("\u10F6", "")
+# def diff_image(text_1: str, text_2: str):
+#     with Drawing() as draw:
+#         with Image(width=1000, height=1000, background=Color('hsla(0, 0, 100, 50)')) as img:
+#             draw.font_family = 'Helvetica'
+#             draw.font_size = 30.0
+#             draw.push()
+#             draw.fill_color = Color("hsl(0%, 0%, 0%)")
+#             draw.gravity = "north_west"
+#             draw.text_under_color = Color("hsl(0%, 100%, 50%)")
+#             draw.text(10,10, "\n".join(textwrap.wrap("Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters.", 75)))
+#             text_1 = "\u10F6" + text_1  # otherwise edits without matching preceding text are not shown
+#             text_2 = "\u10F6" + text_2
+#             out = []
+#             matched_blocks = lev.matching_blocks(lev.editops(text_1, text_2), text_1, text_2)
+#             for i, matching in enumerate(zip(matched_blocks, matched_blocks[1:] + [0])):
+#                 if matching[0][2] == 0:
+#                     continue
+#                 if matching[0][0] > 0 and i == 0:
+#                     out.append("[--[")
+#                     for n in range(matching[0][0]):
+#                         out.append(text_1[n])
+#                     out.append("], ++[")
+#                     for n in range(matching[0][0]):
+#                         out.append(text_2[n])
+#                     out.append("]]")
+#                 for n in range(matching[0][2]):
+#                     out.append(text_1[n+matching[0][0]])
+#                 has_remove = (matching[0][0] + matching[0][2]) - matching[1][0] < 0
+#                 has_add    = (matching[0][1] + matching[0][2]) - matching[1][1] < 0
+#                 if has_add or has_remove:
+#                     out.append("[")
+#                     if has_remove:
+#                         out.append("--[")
+#                         for n in range(matching[0][0] + matching[0][2], matching[1][0]):
+#                             out.append(text_1[n])
+#                         out.append("], ")
+#                     if has_add:
+#                         out.append("++[")
+#                         for n in range(matching[0][1] + matching[0][2], matching[1][1]):
+#                             out.append(text_2[n])
+#                         out.append("]")
+#                     out.append("]")
+#             draw.pop()
+#             draw(img)
+#             img.save(filename='image.png')
+#             return "".join(out).replace("\u10F6", "")
 
 def diff(text_1: str, text_2: str):
     text_1 = "\u10F6" + text_1  # otherwise edits without matching preceding text are not shown
@@ -107,6 +110,59 @@ def diff(text_1: str, text_2: str):
                 out.append("]")
             out.append("]")
     return "".join(out).replace("\u10F6", "")
+
+
+def diff_latex(text_1: str, text_2: str):
+    text_1 = "\u10F6" + text_1  # otherwise edits without matching preceding text are not shown
+    text_2 = "\u10F6" + text_2
+    initial = ["\\documentclass[12pt]{article}\n\\usepackage[scaled]{helvet}\n\\usepackage[text={8.5in,200in}]{geometry}\n\\renewcommand\\familydefault{\sfdefault}\n\\usepackage[T1]{fontenc}\n\\usepackage{xspace}\n\\usepackage{xcolor}\n\\usepackage[hidelinks]{hyperref}\n\\usepackage{soul}\n\n\\definecolor{added}{RGB}{176, 195, 79}\n\\definecolor{removed}{RGB}{221, 96, 120}\n\n\\newcommand{\\rcadded}[1]{\\sethlcolor{added}\\hl{\\textbf{#1}}}\n\n\\newcommand{\\rcremoved}[1]{\\sethlcolor{removed}\\hl{\\textbf{#1}}}\n\n\\topmargin=-1.1in\n\\oddsidemargin=-0.5in\n\\textwidth=7.5in\n\\footskip=0.3in\n\n\\begin{document}\n\\raggedright\n\\Large\n\\newdimen\\height\n\n\\setbox0=\\vbox{"]
+    out = []
+    matched_blocks = lev.matching_blocks(lev.editops(text_1, text_2), text_1, text_2)
+    for i, matching in enumerate(zip(matched_blocks, matched_blocks[1:] + [0])):
+        if matching[0][2] == 0:
+            continue
+        if matching[0][0] > 0 and i == 0:
+            out.append("\\rcremoved{-{}-")
+            for n in range(matching[0][0]):
+                out.append(text_1[n])
+            out.append("}, \\rcadded{++")
+            for n in range(matching[0][0]):
+                out.append(text_2[n])
+            out.append("}")
+        for n in range(matching[0][2]):
+            out.append(text_1[n+matching[0][0]])
+        has_remove = (matching[0][0] + matching[0][2]) - matching[1][0] < 0
+        has_add    = (matching[0][1] + matching[0][2]) - matching[1][1] < 0
+        # if has_add or has_remove:
+        # out.append("[")
+        if has_remove:
+            out.append("\\rcremoved{-{}-")
+            for n in range(matching[0][0] + matching[0][2], matching[1][0]):
+                out.append(text_1[n])
+            out.append("}")
+        if has_add:
+            out.append("\\rcadded{++")
+            for n in range(matching[0][1] + matching[0][2], matching[1][1]):
+                out.append(text_2[n])
+            out.append("}")
+        # out.append("]")
+    out = initial + out + ["}"] + out
+    out.append("\n\\height=\\ht0 \\advance\\height by \\dp0\n\\newlength\\finallength\\setlength{\\finallength}{\\height plus 200pt minus 100pt}\n\\addtolength{\\finallength}{0.9in}\n\\pdfpageheight=\\finallength\n\\end{document}")
+    current_datetime = str(datetime.datetime.now())
+    current_datetime = current_datetime.replace("-", "")
+    current_datetime = current_datetime.replace(":", "")
+    current_datetime = current_datetime.replace(".", "")
+    current_datetime = current_datetime.replace(" ", "_")
+    filename = f"/Users/macbookpro/rcbot/tex_files/{current_datetime}/"
+    os.mkdir(filename)
+    with open(f"{filename}{current_datetime}.tex", "w+") as f:
+        f.write("".join(out).replace("\u10F6", ""))
+    os.chdir(filename)
+    os.system(f"pdflatex {filename}{current_datetime}.tex")
+    shutil.copy2(f"{filename}{current_datetime}.pdf", os.path.dirname(os.path.realpath("/Users/macbookpro/rcbot/text_images/")))
+    shutil.rmtree("/Users/macbookpro/rcbot/tex_files/")
+    os.mkdir("/Users/macbookpro/rcbot/tex_files/")
+    return filename
 
 
 class Revision:
@@ -181,6 +237,9 @@ class Policy:
 
     def diff(self, index_1: int, index_2: int):
         return diff(self.revisions[index_1].text, self.revisions[index_2].text)
+
+    def diff_latex(self, index_1: int, index_2: int):
+        return diff_latex(self.revisions[index_1].text, self.revisions[index_2].text)
 
     def __repr__(self, spacing: str = ""):
         return spacing + "policy <" + self.title + ">\n" + "\n".join([spacing*2 + "\" " + x for x in textwrap.wrap(self.text)])
@@ -326,9 +385,9 @@ p[i][1].add("six"   , "abc def abc def abc def abc def abc def 6 abc def abc def
 p[i][2].add("seven" , "abc def abc def abc def abc def abc def abc def 7 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
 p[i][2].add("eight" , "abc def abc def abc def abc def abc def abc def abc def 8 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
 p[i][2].add("nine"  , "abc def abc def abc def abc def abc def abc def abc def abc def 9 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-print(p)
+# print(p)
 p[i].swap(0, 2)
-print(p)
-p[i][2][0].text = "The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's."
-p[i][2][0].text = "Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters."
-print(p[i][2][0].diff(1, 2))
+# print(p)
+p[i][2][0].text = "The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's."
+p[i][2][0].text = "Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters. Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters. Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters. Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters. Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters. Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters."
+print(p[i][2][0].diff_latex(1, 2))
