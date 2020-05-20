@@ -175,6 +175,7 @@ def edit_ratio(text_1: str, text_2: str):
 
 
 def diff_latex__no_render__no_header(text_1: str, text_2: str):
+    print("<> LaTeX Compositing Started")
     text_1 = "\u10F6" + text_1  # otherwise edits without matching preceding text are not shown
     text_2 = "\u10F6" + text_2
     out = []
@@ -210,6 +211,7 @@ def diff_latex__no_render__no_header(text_1: str, text_2: str):
 
 
 def diff_latex__bulk_diff__no_render__no_header(text_1: str, text_2: str):
+    print("<> LaTeX Compositing Started")
     text_1 = "\u10F6" + text_1  # otherwise edits without matching preceding text are not shown
     text_2 = "\u10F6" + text_2
     out = []
@@ -254,6 +256,7 @@ def diff_latex__add_header_footer(text):
 
 
 def latex_render(text: str):
+    print("<> LaTeX Render Started")
     current_datetime = str(datetime.datetime.now())
     current_datetime = current_datetime.replace("-", "")
     current_datetime = current_datetime.replace(":", "")
@@ -269,6 +272,7 @@ def latex_render(text: str):
     images = pdf2image.convert_from_path(f"/Users/macbookpro/rcbot/text_images/{current_datetime}.pdf", output_folder="/Users/macbookpro/rcbot/text_images/", fmt='png', output_file=current_datetime, single_file=True)
     shutil.rmtree("/Users/macbookpro/rcbot/tex_files/")
     os.mkdir("/Users/macbookpro/rcbot/tex_files/")
+    print("<> LaTeX Render Finished")
     return current_datetime
 
 
@@ -556,25 +560,25 @@ class Platform:
         return hash((self.branches, id(self)))
 
 
-p = Platform()
-i = p.fork(1, "test")
-p[i].add("foo")
-p[i].add("bar")
-p[i].add("bat", 1)
-p[i][0].add("one"   , "1 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][0].add("two"   , "abc def 2 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][0].add("three" , "abc def abc def 3 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][1].add("four"  , "abc def abc def abc def 4 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][1].add("five"  , "abc def abc def abc def abc def 5 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][1].add("six"   , "abc def abc def abc def abc def abc def 6 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][2].add("seven" , "abc def abc def abc def abc def abc def abc def 7 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][2].add("eight" , "abc def abc def abc def abc def abc def abc def abc def 8 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
-p[i][2].add("nine"  , "abc def abc def abc def abc def abc def abc def abc def abc def 9 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p = Platform()
+# i = p.fork(1, "test")
+# p[i].add("foo")
+# p[i].add("bar")
+# p[i].add("bat", 1)
+# p[i][0].add("one"   , "1 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][0].add("two"   , "abc def 2 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][0].add("three" , "abc def abc def 3 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][1].add("four"  , "abc def abc def abc def 4 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][1].add("five"  , "abc def abc def abc def abc def 5 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][1].add("six"   , "abc def abc def abc def abc def abc def 6 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][2].add("seven" , "abc def abc def abc def abc def abc def abc def 7 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][2].add("eight" , "abc def abc def abc def abc def abc def abc def abc def 8 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
+# p[i][2].add("nine"  , "abc def abc def abc def abc def abc def abc def abc def abc def 9 abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def")
 # print(p)
-p[i].swap(0, 2)
+# p[i].swap(0, 2)
 # print(p)
-p[i][2][0].text = "The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's."
-p[i][2][0].text = "Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters."
-print(p[i].diff_latex(1, 2, 0, 10))
-print(p[i][2][0].diff_latex(1, 2))
-print(global_.latex_render_dict)
+# p[i][2][0].text = "The result is a list of triples (operation, spos, dpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; spos and dpos are position of characters in the first (source) and the second (destination) strings. These are operations on signle characters. In fact the returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's."
+# p[i][2][0].text = "Blah. The result is a list of tuples (operation, startpos, destpos), where operation is one of 'equal', 'replace', 'insert', or 'delete'; startpos and destpos are position of characters in the first (source) and the second (destination) strings. The returned list doesn't contain the 'equal', but all the related functions accept both lists with and without 'equal's. These are operations on single characters."
+# print(p[i].diff_latex(1, 2, 0, 10))
+# print(p[i][2][0].diff_latex(1, 2))
+# print(global_.latex_render_dict)
