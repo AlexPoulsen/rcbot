@@ -286,7 +286,7 @@ def diff_latex(text_1: str, text_2: str):
 
 
 class Revision:
-    __text: str = ""
+    __text: str
     parent_id: int = 0
     __initialized: bool = False
 
@@ -407,14 +407,14 @@ class Section:
         self.policy_order[index_1] = self.policy_order[index_2]
         self.policy_order[index_2] = temp
 
-    def add(self, title: str, name: str, index: int = -1):
+    def add(self, title: str, text: str, index: int = -1):
         global_.policy_id += 1
         if index == -1:
-            self.policies_by_id.append(Policy(title, name, global_.policy_id))
+            self.policies_by_id.append(Policy(title, text, global_.policy_id))
             self.policy_order.append(len(self.policies_by_id)-1)
             return len(self.policy_order) - 1
         else:
-            self.policies_by_id.append(Policy(title, name, global_.policy_id))
+            self.policies_by_id.append(Policy(title, text, global_.policy_id))
             self.policy_order.insert(index, len(self.policies_by_id)-1)
             return index + 1
 
