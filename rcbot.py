@@ -196,6 +196,14 @@ async def section_select(ctx, section_id: Int__AlertInChat("Invalid section id")
     global_.section = section_id
     await ctx.send(f"Set section selector to `{section_id}`.")
 
+@section.command(name="diff")
+async def section_diff(ctx, index_1: Int__AlertInChat("Invalid section id"), index_2: Int__AlertInChat("Invalid section id"), policy_start: Int__AlertInChat("Invalid section id") = 0, policy_range: Int__AlertInChat("Invalid section id") = 99999999999999):
+    if global_.int_conversion_error:
+        print("Bad integer input, returning")
+        return
+    file_id = global_.platform[global_.branch].diff_latex(index_1, index_2, policy_start, policy_range)
+    await ctx.send(file=discord.File(f"{file_id}.png"))
+
 
 @bot.group(name="policy")
 async def policy(ctx):
