@@ -210,6 +210,20 @@ async def policy(ctx):
     if ctx.invoked_subcommand is None:
         await ctx.send('Invalid subcommand.')
 
+@policy.command(name="add", rest_is_raw=True)
+async def policy_add(ctx, policy_id: Int__AlertInChat("Invalid section id"), name: str = "", *, text: str):
+    if global_.int_conversion_error:
+        print("Bad integer input")
+        await ctx.send("Invalid policy id, appending new policy.")
+    if name == "":
+        current_datetime = str(datetime.datetime.now())
+        current_datetime = current_datetime.replace("-", "")
+        current_datetime = current_datetime.replace(":", "")
+        current_datetime = current_datetime.replace(".", "")
+        current_datetime = current_datetime.replace(" ", "_")
+        name = f"new_policy_{len(global_.platform[global_.branch][global_.section])}_{current_datetime}."
+    await ctx.send(f"New policy `{name}` id `{global_.platform[global_.branch][global_.section].add(name, policy_id)}`.")
+
 
 with open("rcbot.keys") as keys:
     key_dict = {}
